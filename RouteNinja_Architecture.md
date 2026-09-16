@@ -275,7 +275,7 @@ sequenceDiagram
     participant Auth as Auth Module
     participant Cache as Redis Cache
     participant Geo as Nominatim/OSRM
-    participant Opt as Python Optimizer
+    participant PyOpt as Python Optimizer
     participant DSE as Explainability Engine
     participant DB as PostgreSQL
 
@@ -296,14 +296,14 @@ sequenceDiagram
         API->>Cache: Store matrix (TTL: 1 hour)
     end
 
-    API->>Opt: POST /optimize (addresses, constraints, vehicle)
-    Opt->>Opt: Run Nearest Neighbor solver
-    Opt->>Opt: Run TSP solver (if < 15 stops)
-    Opt->>Opt: Apply constraints (time windows, capacity)
-    Opt->>Opt: Generate alternative routes
-    Opt->>DSE: Generate explanations
-    DSE-->>Opt: Route explanations + risk score
-    Opt-->>API: Return optimized routes + explanations
+    API->>PyOpt: POST /optimize (addresses, constraints, vehicle)
+    PyOpt->>PyOpt: Run Nearest Neighbor solver
+    PyOpt->>PyOpt: Run TSP solver (if < 15 stops)
+    PyOpt->>PyOpt: Apply constraints (time windows, capacity)
+    PyOpt->>PyOpt: Generate alternative routes
+    PyOpt->>DSE: Generate explanations
+    DSE-->>PyOpt: Route explanations + risk score
+    PyOpt-->>API: Return optimized routes + explanations
 
     API->>DB: Save route to history
     API-->>React: Return optimized route response
@@ -347,14 +347,14 @@ sequenceDiagram
     actor User
     participant React as React Frontend
     participant API as Node.js Backend
-    participant Opt as Python Optimizer
+    participant PyOpt as Python Optimizer
     participant DB as PostgreSQL
 
     User->>React: View optimized route on map
     User->>React: Drag-and-drop to reorder stops
     React->>API: POST /api/routes/compare { originalRoute, userRoute }
-    API->>Opt: Calculate metrics for user's route
-    Opt-->>API: { distance, time, fuel, cost, emissions }
+    API->>PyOpt: Calculate metrics for user's route
+    PyOpt-->>API: { distance, time, fuel, cost, emissions }
     API-->>React: Comparison result (algorithm vs human)
     React-->>User: Show side-by-side comparison dashboard
 
